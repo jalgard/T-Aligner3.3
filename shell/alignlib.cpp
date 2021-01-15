@@ -55,7 +55,7 @@ int AlignLibOnRef()
     string fastq_output_file = output_prefix + output_fastq;
 
     cerr << "Saving read alignments in TAF format:\t" << taf_output_file << "\n";
-	WriteAlignedReadsTAF(selectedRefAlignments[0], refTless,
+	WriteAlignedReadsTAF(selectedRefAlignments[0], refTless, refsBank,
             taf_output_file.c_str());
 
     cerr << "Saving read alignments in FASTQ format:\t" << fastq_output_file << "\n";

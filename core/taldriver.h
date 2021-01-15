@@ -9,7 +9,7 @@
 
 using namespace std;
 
-vector<TAlignment> AlignDriverSE(vector<string>& readBufferChain, ReadAlignmentTask& preRAT)
+vector<TAlignment> AlignDriverSE(vector<string>& readBufferChain, vector<int>& readIdChain, ReadAlignmentTask& preRAT)
 {
 	vector<TAlignment> Alignments;
 	int minReadLength = TAlignerOptions::Options().getOption("Aligner|MinMappedSegment");
@@ -20,7 +20,9 @@ vector<TAlignment> AlignDriverSE(vector<string>& readBufferChain, ReadAlignmentT
 		ReadAlignmentTask fwRAT = preRAT;
 		ReadAlignmentTask rvRAT = preRAT;
 		fwRAT.read = MakeTless(readBufferChain[i]);
+        fwRAT.rd_id = readIdChain[i];
 		rvRAT.read = MakeTless(ReverseAndComplementDNA(readBufferChain[i]));
+        rvRAT.rd_id = readIdChain[i];
 		TAlignment alignFw, alignRv;
 		if(fwRAT.read.T.size() > minReadLength)
 		{
@@ -76,6 +78,7 @@ vector<TAlignment> SingleEndAlignFastqMT(const char* libFile, ReadAlignmentTask&
 	TAlignerOptions::Options().Log("Job size " + std::to_string(jobSizeInReads) + " as suggested by memory preset \"" + memPreset + "\"");
 
 	vector<vector<string> > readsBuffer(nThreads);
+    vector<vector<int> > readIds(nThreads);
 	vector<future<vector<TAlignment> > > alignFutures;
 	const int maximalJobSize = jobSizeInReads * nThreads;
 	int totalJobSizeCounter = 0;
@@ -87,7 +90,7 @@ vector<TAlignment> SingleEndAlignFastqMT(const char* libFile, ReadAlignmentTask&
 		for(int i = 0; i < readsBuffer.size(); i++)
 		{
 			alignFutures.push_back(async(launch::async,
-				AlignDriverSE, std::ref(readsBuffer[i]), std::ref(preRAT)));
+				AlignDriverSE, std::ref(readsBuffer[i]), std::ref(readIds[i]), std::ref(preRAT)));
 		}
 		for(auto &alignResult : alignFutures)
 		{
@@ -112,6 +115,8 @@ vector<TAlignment> SingleEndAlignFastqMT(const char* libFile, ReadAlignmentTask&
 			std::getline(ifile, line3, '\n') &&
 			std::getline(ifile, line4, '\n'))
 	{
+        // count all reads and use 'totalReadReadCounter' as unique read ID
+        totalReadReadCounter++;
 		if(line1[0] == '@' && line2.size() > 1 && line2.size() == line4.size())
 		{
 			// check if the read's sequence is composed of only
@@ -119,8 +124,9 @@ vector<TAlignment> SingleEndAlignFastqMT(const char* libFile, ReadAlignmentTask&
 			// T-Aligner will skip read if it contains any other charater
 			if(DoReadSequenceSanityCheck(line2)) {
 
-				totalReadReadCounter++;
-				readsBuffer[totalJobSizeCounter % nThreads].push_back(line2);
+				int ji = totalJobSizeCounter % nThreads;
+				readsBuffer[ji].push_back(line2);
+                readIds[ji].push_back(totalReadReadCounter);
 				totalJobSizeCounter++;
 				if(totalJobSizeCounter > maximalJobSize)
 				{
@@ -167,14 +173,15 @@ string PrintReadTaf(TAlignment& read, vector<TlessDNA>& refTless, const string& 
 }
 
 void WriteAlignedReadsTAF(vector<TAlignment>& reads,
-	vector<TlessDNA>& refTless, const char* file)
+	vector<TlessDNA>& refTless, vector<vector<string> >& ReferenceHolder, const char* file)
 {
 	ofstream ofile(file);
 	int readId = 0;
 	for(int i = 0; i < reads.size(); i++)
 	{
-		ofile << reads[i].ref_Idx << "\t";
-		ofile << "@tal" << ++readId << "\t";
+		ofile << ReferenceHolder[reads[i].ref_Idx][0] << "\t";
+        ++readId;
+		ofile << "@" << reads[i].rd_id << "\t";
 		ofile << reads[i].ref_S << "\t";
 		ofile << reads[i].ref_E << "\t";
 		for(int j = 0; j < reads[i].dR.size(); j++)
@@ -183,7 +190,9 @@ void WriteAlignedReadsTAF(vector<TAlignment>& reads,
 		}
         ofile << "\t";
         auto read_seq = Alignment2Seq(reads[i], refTless);
-        ofile << read_seq;
+        ofile << read_seq << "\t";
+        ofile << Translate(refTless[reads[i].ref_Idx], reads[i].ref_S) << "\t";
+		ofile << Translate(refTless[reads[i].ref_Idx], reads[i].ref_E);
 		ofile << "\n";
 	}
 	ofile.close();

@@ -117,13 +117,19 @@ int FindOrfs()
         TAlignerOptions::Options().getOption("ORFinder|OutputEachOrfAlignment");
 
 
+    string orf_mode = TAlignerOptions::Options().getOption("ORFinder|PreferredMode");
+
     for(auto&& orf : orfs_vector)
     {
         if(get<1>(orf).size() < orf_length_min_aa) continue;
 
-        ofile_cds_fasta << ">" << reference_name_prefix << " assembled ORF " << orf_name_suffix << "\n";
-        ofile_pep_fasta << ">" << reference_name_prefix << " assembled ORF (translated, " << genetic_code_name  <<  ") " << orf_name_suffix << "\n";
-        ofile_mrna_fasta << ">" << reference_name_prefix << " assembled mRNA " << orf_name_suffix << "\n";
+        //ofile_cds_fasta << ">" << reference_name_prefix << " assembled ORF " << orf_name_suffix << "\n";
+        //ofile_pep_fasta << ">" << reference_name_prefix << " assembled ORF (translated, " << genetic_code_name  <<  ") " << orf_name_suffix << "\n";
+        //ofile_mrna_fasta << ">" << reference_name_prefix << " assembled mRNA " << orf_name_suffix << "\n";
+
+        ofile_cds_fasta << ">" << reference_name_prefix << "_" << orf_mode << "_ORF_" << orf_name_suffix << "\n";
+        ofile_pep_fasta << ">" << reference_name_prefix << "_" << orf_mode << "_ORF_" << orf_name_suffix << "\n";
+        ofile_mrna_fasta << ">" << reference_name_prefix << "_" << orf_mode << "_mRNA_" << orf_name_suffix << "\n";
 
         ofile_cds_fasta << get<0>(orf) << "\n";
         ofile_pep_fasta << get<1>(orf) << "\n";

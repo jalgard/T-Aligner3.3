@@ -34,6 +34,7 @@ static inline map<string, string> setGeneticCode(string geneticCodeId)
 		geneticCodeTable["->ATG"] = "start";
 		geneticCodeTable["->TTG"] = "start";
         geneticCodeTable["->GTG"] = "start";
+        geneticCodeTable["->CTG"] = "start";
         geneticCodeTable["->ATA"] = "start";
 		geneticCodeTable["<-TAA"] = "stop";
 		geneticCodeTable["<-TAG"] = "stop";

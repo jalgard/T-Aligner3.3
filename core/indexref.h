@@ -32,7 +32,7 @@ int ReferenceLoader(const char* filename, vector<vector<string> >& ReferenceHold
                 {
                     throw runtime_error("\nInput error: reference " +
                     ReferenceHolder.back()[0] + " from file " +
-                    string(filename) + " contains " + string(letter) + " in position " +
+                    string(filename) + " contains " + string(1, letter) + " in position " +
                     std::to_string(ReferenceHolder.back()[1].size()+i+1) +
                     " which is not A/T/G/C!\n Exiting...\n\n");
                     return -1;

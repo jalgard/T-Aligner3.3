@@ -45,6 +45,7 @@ struct TAlignment
 
     int mmcount;
     int ref_ESD;
+    int rd_id;
     unsigned int flags;
 
     TAlignment() : ref_Idx(-1), flags(0) {}
@@ -112,6 +113,7 @@ public:
     unordered_map<string, vector<Rindex> >* refIndex;
     vector<TlessDNA>* refTless;
     TlessDNA read;
+    int rd_id;
 };
 
 TAlignment TAlignRead(ReadAlignmentTask& T)
@@ -156,6 +158,7 @@ TAlignment TAlignRead(ReadAlignmentTask& T)
 
     TAlignment bestAlignment;
     bestAlignment.flags &= ~TA::AF_Valid;
+    bestAlignment.rd_id = T.rd_id;
 
     if(Alignments.size() > 0)
     {
