@@ -23,3 +23,7 @@ Please use currently maintained version.
 
 First version of T-Aligner (v. 1-2) was using Qt library to plot dot matrices and other stuff, but the code was written for Qt4.x, which 
 is currently not available. After v. 3 we completely switched to python's matplotlib for plotting.
+
+## Citation
+
+Evgeny S Gerasimov, Anna A Gasparyan, Iosif Kaurov, Boris Tichý, Maria D Logacheva, Alexander A Kolesnikov, Julius Lukeš, Vyacheslav Yurchenko, Sara L Zimmer, Pavel Flegontov, Trypanosomatid mitochondrial RNA editing: dramatically complex transcript repertoires revealed with a dedicated mapping tool, Nucleic Acids Research, Volume 46, Issue 2, 25 January 2018, Pages 765–781, https://doi.org/10.1093/nar/gkx1202
